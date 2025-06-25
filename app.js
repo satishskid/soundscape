@@ -7,6 +7,7 @@ class HearingScreenApp {
         this.oscillator = null;
         this.gainNode = null;
         this.isPlaying = false;
+        this.currentToneTimeout = null;
         
         // Test data from JSON
         this.testFrequencies = [250, 500, 1000, 2000, 4000, 8000];
@@ -52,6 +53,8 @@ class HearingScreenApp {
         this.isChildMode = false;
         this.currentSoundNumber = 1;
         this.totalSoundsForFrequency = 12; // Approximate sounds per frequency
+        this.waitingForResponse = false;
+        this.responseTimeout = null;
         
         // Environment checks
         this.environmentChecks = {
@@ -351,12 +354,24 @@ class HearingScreenApp {
     
     // Audio Methods
     async playTone(frequency, volume = 0.5, duration = 1000) {
-        if (!this.audioContext) return;
+        if (!this.audioContext || this.isPlaying) return;
         
+        // Stop any existing tone
         if (this.oscillator) {
-            this.oscillator.stop();
+            try {
+                this.oscillator.stop();
+            } catch (e) {
+                // Oscillator might already be stopped
+            }
             this.oscillator = null;
         }
+        
+        // Clear any existing tone timeout
+        if (this.currentToneTimeout) {
+            clearTimeout(this.currentToneTimeout);
+        }
+        
+        this.isPlaying = true;
         
         this.oscillator = this.audioContext.createOscillator();
         const envelope = this.audioContext.createGain();
@@ -376,13 +391,12 @@ class HearingScreenApp {
         this.oscillator.start();
         this.oscillator.stop(this.audioContext.currentTime + duration / 1000);
         
-        this.isPlaying = true;
-        
         return new Promise((resolve) => {
-            this.oscillator.onended = () => {
+            this.currentToneTimeout = setTimeout(() => {
                 this.isPlaying = false;
+                this.oscillator = null;
                 resolve();
-            };
+            }, duration);
         });
     }
     
@@ -493,11 +507,26 @@ class HearingScreenApp {
     }
     
     async playTestTone(frequency) {
-        if (this.isPaused || this.currentLevel > 100) {
-            // No response at maximum level
-            this.recordThreshold(120); // Record as 120 dB HL (no response)
+        if (this.isPaused || this.currentLevel > 100 || this.waitingForResponse) {
+            // Don't start new tone if already waiting for response or paused
+            if (this.currentLevel > 100) {
+                this.recordThreshold(120); // Record as 120 dB HL (no response)
+            }
             return;
         }
+        
+        // Stop any existing tone first
+        if (this.oscillator) {
+            try {
+                this.oscillator.stop();
+                this.oscillator = null;
+            } catch (e) {
+                // Tone already stopped
+            }
+        }
+        
+        // Update UI
+        this.updateTestUI(frequency);
         
         // Convert dB HL to volume (simplified conversion)
         const volume = this.dbHLToVolume(this.currentLevel);
@@ -505,15 +534,25 @@ class HearingScreenApp {
         // Show listening indicator
         document.getElementById('listening-indicator').style.display = 'flex';
         
+        // Clear any existing timeout
+        if (this.responseTimeout) {
+            clearTimeout(this.responseTimeout);
+            this.responseTimeout = null;
+        }
+        
+        // Set waiting flag BEFORE playing tone
+        this.waitingForResponse = true;
+        
         await this.playTone(frequency, volume, 1000);
         
-        // Wait for response (timeout after 5 seconds)
-        this.waitingForResponse = true;
-        setTimeout(() => {
-            if (this.waitingForResponse) {
-                this.handleResponse(false); // No response = didn't hear
-            }
-        }, 5000);
+        // Set timeout for no response (only if still waiting)
+        if (this.waitingForResponse) {
+            this.responseTimeout = setTimeout(() => {
+                if (this.waitingForResponse) {
+                    this.handleResponse(false); // No response = didn't hear
+                }
+            }, 5000);
+        }
     }
     
     dbHLToVolume(dbHL) {
@@ -528,8 +567,24 @@ class HearingScreenApp {
     handleResponse(heard) {
         if (!this.waitingForResponse) return;
         
+        // Clear the timeout and reset flags FIRST
+        if (this.responseTimeout) {
+            clearTimeout(this.responseTimeout);
+            this.responseTimeout = null;
+        }
+        
         this.waitingForResponse = false;
         document.getElementById('listening-indicator').style.display = 'none';
+        
+        // Stop any currently playing tone
+        if (this.oscillator) {
+            try {
+                this.oscillator.stop();
+                this.oscillator = null;
+            } catch (e) {
+                // Tone already stopped
+            }
+        }
         
         // Increment sound counter
         this.currentSoundNumber++;
@@ -544,9 +599,14 @@ class HearingScreenApp {
             if (this.currentLevel < -10) {
                 // Found threshold
                 this.recordThreshold(this.currentLevel + 10);
+                return; // Exit here to prevent further processing
             } else {
-                // Continue testing at lower level
-                setTimeout(() => this.playTestTone(frequency), 1000);
+                // Continue testing at lower level after delay
+                setTimeout(() => {
+                    if (!this.waitingForResponse && !this.isPaused) {
+                        this.playTestTone(frequency);
+                    }
+                }, 1000);
             }
         } else {
             // Increase level by 5 dB
@@ -556,9 +616,14 @@ class HearingScreenApp {
             if (this.noResponseCount >= 3 && this.currentLevel > 50) {
                 // No response at high levels
                 this.recordThreshold(this.currentLevel);
+                return; // Exit here to prevent further processing
             } else {
-                // Continue testing at higher level
-                setTimeout(() => this.playTestTone(frequency), 1000);
+                // Continue testing at higher level after delay
+                setTimeout(() => {
+                    if (!this.waitingForResponse && !this.isPaused) {
+                        this.playTestTone(frequency);
+                    }
+                }, 1000);
             }
         }
     }
@@ -578,8 +643,18 @@ class HearingScreenApp {
     }
     
     moveToNextTest() {
+        // Reset all test state for new frequency
         this.currentFrequencyIndex++;
         this.currentSoundNumber = 1; // Reset counter for new frequency
+        this.currentLevel = 40; // Reset to starting level
+        this.noResponseCount = 0; // Reset no response counter
+        this.waitingForResponse = false; // Reset response flag
+        
+        // Clear any pending timeouts
+        if (this.responseTimeout) {
+            clearTimeout(this.responseTimeout);
+            this.responseTimeout = null;
+        }
         
         if (this.currentFrequencyIndex >= this.testFrequencies.length) {
             // Finished current ear
@@ -605,13 +680,36 @@ class HearingScreenApp {
         const button = document.getElementById('pause-btn');
         button.textContent = this.isPaused ? 'Resume Test' : 'Pause Test';
         
-        if (!this.isPaused) {
-            this.startFrequencyTest();
+        if (this.isPaused) {
+            // Stop any ongoing tone and clear timeouts
+            this.waitingForResponse = false;
+            if (this.responseTimeout) {
+                clearTimeout(this.responseTimeout);
+                this.responseTimeout = null;
+            }
+            if (this.currentToneTimeout) {
+                clearTimeout(this.currentToneTimeout);
+                this.currentToneTimeout = null;
+            }
+            if (this.oscillator) {
+                try {
+                    this.oscillator.stop();
+                } catch (e) {
+                    // Already stopped
+                }
+                this.oscillator = null;
+            }
+            this.isPlaying = false;
+            document.getElementById('listening-indicator').style.display = 'none';
+        } else {
+            // Resume test
+            const frequency = this.testFrequencies[this.currentFrequencyIndex];
+            setTimeout(() => this.playTestTone(frequency), 500);
         }
     }
     
     repeatTone() {
-        if (!this.isPaused) {
+        if (!this.isPaused && !this.waitingForResponse) {
             const frequency = this.testFrequencies[this.currentFrequencyIndex];
             this.playTestTone(frequency);
         }
