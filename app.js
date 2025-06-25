@@ -10,6 +10,14 @@ class HearingScreenApp {
         
         // Test data from JSON
         this.testFrequencies = [250, 500, 1000, 2000, 4000, 8000];
+        this.frequencyDescriptions = {
+            250: "Deep truck engine",
+            500: "Foghorn sound", 
+            1000: "Phone ringing",
+            2000: "Alarm beeping",
+            4000: "High whistle",
+            8000: "Cricket chirping"
+        };
         this.hearingLevels = [-10, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120];
         this.hearingClassifications = {
             "normal": {"range": [-10, 25], "color": "#22C55E", "description": "Normal hearing"},
@@ -42,6 +50,8 @@ class HearingScreenApp {
         this.isPaused = false;
         this.noResponseCount = 0;
         this.isChildMode = false;
+        this.currentSoundNumber = 1;
+        this.totalSoundsForFrequency = 12; // Approximate sounds per frequency
         
         // Environment checks
         this.environmentChecks = {
@@ -100,6 +110,17 @@ class HearingScreenApp {
         });
         
         document.getElementById('environment-continue-btn').addEventListener('click', () => {
+            this.showScreen('preparation-screen');
+        });
+        
+        // Preparation screen
+        document.querySelectorAll('.prep-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                this.updatePreparationButton();
+            });
+        });
+        
+        document.getElementById('preparation-continue-btn').addEventListener('click', () => {
             this.showScreen('patient-screen');
         });
         
@@ -285,6 +306,12 @@ class HearingScreenApp {
         continueBtn.disabled = !allChecksPass;
     }
     
+    updatePreparationButton() {
+        const checkboxes = document.querySelectorAll('.prep-checkbox');
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        document.getElementById('preparation-continue-btn').disabled = !allChecked;
+    }
+    
     // Patient Data Methods
     handlePatientForm() {
         const formData = new FormData(document.getElementById('patient-form'));
@@ -448,6 +475,13 @@ class HearingScreenApp {
             this.currentEar === 'right' ? '👂' : '👂';
         document.getElementById('current-frequency').textContent = frequency + ' Hz';
         
+        // Update frequency description
+        const description = this.frequencyDescriptions[frequency] || 'Test tone';
+        document.getElementById('current-frequency-desc').textContent = `(${description})`;
+        
+        // Update sound counter
+        document.getElementById('current-sound-number').textContent = this.currentSoundNumber;
+        
         // Update progress
         const totalTests = this.testFrequencies.length * 2; // Both ears
         const completedTests = Object.keys(this.testResults.right).length + 
@@ -497,6 +531,9 @@ class HearingScreenApp {
         this.waitingForResponse = false;
         document.getElementById('listening-indicator').style.display = 'none';
         
+        // Increment sound counter
+        this.currentSoundNumber++;
+        
         const frequency = this.testFrequencies[this.currentFrequencyIndex];
         
         if (heard) {
@@ -542,6 +579,7 @@ class HearingScreenApp {
     
     moveToNextTest() {
         this.currentFrequencyIndex++;
+        this.currentSoundNumber = 1; // Reset counter for new frequency
         
         if (this.currentFrequencyIndex >= this.testFrequencies.length) {
             // Finished current ear

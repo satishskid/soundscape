@@ -133,7 +133,92 @@
                             <div class="status-indicator" id="calibration-status">Not calibrated</div>
                         </div>
                     </div>
-                    <button class="btn btn--primary btn--full-width" id="environment-continue-btn" disabled>Continue to Patient Info</button>
+                    <button class="btn btn--primary btn--full-width" id="environment-continue-btn" disabled>Continue to Preparation</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preparation/Motivation Screen -->
+        <div class="screen" id="preparation-screen">
+            <div class="container">
+                <div class="preparation-content">
+                    <h2>🎧 Getting Ready for Your Hearing Test</h2>
+                    
+                    <div class="science-section">
+                        <h3>🔬 The Science of Sound</h3>
+                        <div class="science-grid">
+                            <div class="science-item">
+                                <div class="science-icon">📊</div>
+                                <h4>Frequency (Hz)</h4>
+                                <p>How high or low a sound is. We test 6 different frequencies from deep rumbles to high chirps.</p>
+                            </div>
+                            <div class="science-item">
+                                <div class="science-icon">🔊</div>
+                                <h4>Intensity (dB)</h4>
+                                <p>How loud or soft a sound is. We start loud and get quieter until you can't hear it.</p>
+                            </div>
+                            <div class="science-item">
+                                <div class="science-icon">👂</div>
+                                <h4>Your Hearing</h4>
+                                <p>Sound travels through your ear and becomes nerve signals that your brain interprets.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="motivation-section">
+                        <h3>💪 You've Got This!</h3>
+                        <div class="motivation-tips">
+                            <div class="tip-item">
+                                <span class="tip-icon">🎯</span>
+                                <div class="tip-content">
+                                    <strong>Stay Focused</strong>
+                                    <p>This test requires your full attention, but it's designed to be comfortable and manageable.</p>
+                                </div>
+                            </div>
+                            <div class="tip-item">
+                                <span class="tip-icon">⏱️</span>
+                                <div class="tip-content">
+                                    <strong>Take Your Time</strong>
+                                    <p>There's no rush. You can pause anytime if you need a break.</p>
+                                </div>
+                            </div>
+                            <div class="tip-item">
+                                <span class="tip-icon">🎵</span>
+                                <div class="tip-content">
+                                    <strong>Trust Your Ears</strong>
+                                    <p>Only respond when you actually hear something. Don't guess!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preparation-checklist">
+                        <h3>✅ Final Checklist</h3>
+                        <div class="checklist-items">
+                            <label class="checklist-item">
+                                <input type="checkbox" class="prep-checkbox">
+                                <span class="checkmark"></span>
+                                <span>I'm in a quiet environment</span>
+                            </label>
+                            <label class="checklist-item">
+                                <input type="checkbox" class="prep-checkbox">
+                                <span class="checkmark"></span>
+                                <span>My headphones are connected and comfortable</span>
+                            </label>
+                            <label class="checklist-item">
+                                <input type="checkbox" class="prep-checkbox">
+                                <span class="checkmark"></span>
+                                <span>I'm sitting comfortably and ready to focus</span>
+                            </label>
+                            <label class="checklist-item">
+                                <input type="checkbox" class="prep-checkbox">
+                                <span class="checkmark"></span>
+                                <span>I understand this is a screening test, not a diagnosis</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="btn btn--primary btn--full-width" id="preparation-continue-btn" disabled>Continue to Patient Info</button>
                 </div>
             </div>
         </div>
@@ -198,12 +283,84 @@
             <div class="container">
                 <div class="instructions-content">
                     <h2>Test Instructions</h2>
+                    
+                    <div class="instructions-overview">
+                        <h3>What to Expect</h3>
+                        <div class="test-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">6</span>
+                                <span class="stat-label">Frequencies</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">2</span>
+                                <span class="stat-label">Ears</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">10-15</span>
+                                <span class="stat-label">Minutes</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">60-80</span>
+                                <span class="stat-label">Total Tones</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sound-examples">
+                        <h3>🎵 Sounds You'll Hear</h3>
+                        <p>The test uses pure tones similar to these familiar sounds:</p>
+                        <div class="sound-examples-grid">
+                            <div class="sound-example">
+                                <div class="sound-icon">🚛</div>
+                                <div class="sound-info">
+                                    <strong>250 Hz</strong>
+                                    <span>Deep truck engine</span>
+                                </div>
+                            </div>
+                            <div class="sound-example">
+                                <div class="sound-icon">🎺</div>
+                                <div class="sound-info">
+                                    <strong>500 Hz</strong>
+                                    <span>Foghorn sound</span>
+                                </div>
+                            </div>
+                            <div class="sound-example">
+                                <div class="sound-icon">📞</div>
+                                <div class="sound-info">
+                                    <strong>1000 Hz</strong>
+                                    <span>Phone ringing</span>
+                                </div>
+                            </div>
+                            <div class="sound-example">
+                                <div class="sound-icon">🔔</div>
+                                <div class="sound-info">
+                                    <strong>2000 Hz</strong>
+                                    <span>Alarm beeping</span>
+                                </div>
+                            </div>
+                            <div class="sound-example">
+                                <div class="sound-icon">🎵</div>
+                                <div class="sound-info">
+                                    <strong>4000 Hz</strong>
+                                    <span>High whistle</span>
+                                </div>
+                            </div>
+                            <div class="sound-example">
+                                <div class="sound-icon">🦗</div>
+                                <div class="sound-info">
+                                    <strong>8000 Hz</strong>
+                                    <span>Cricket chirping</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="instructions-visual">
                         <div class="instruction-step">
                             <div class="step-number">1</div>
                             <div class="step-content">
                                 <h3>Listen Carefully</h3>
-                                <p id="instruction-text-1">You will hear tones at different frequencies. Some will be louder, some softer.</p>
+                                <p id="instruction-text-1">You will hear tones at different frequencies. Some will be louder, some softer. Each frequency will be tested multiple times at different volumes.</p>
                             </div>
                         </div>
 
@@ -211,7 +368,7 @@
                             <div class="step-number">2</div>
                             <div class="step-content">
                                 <h3>Respond When You Hear</h3>
-                                <p id="instruction-text-2">Tap "I Hear It" as soon as you hear any tone, no matter how quiet.</p>
+                                <p id="instruction-text-2">Tap "I Hear It" as soon as you hear any tone, no matter how quiet. Don't guess - only respond when you actually hear something.</p>
                             </div>
                         </div>
 
@@ -219,15 +376,21 @@
                             <div class="step-number">3</div>
                             <div class="step-content">
                                 <h3>Stay Focused</h3>
-                                <p id="instruction-text-3">We'll test each ear separately. The test takes about 5-10 minutes.</p>
+                                <p id="instruction-text-3">We'll test each ear separately. The test takes about 10-15 minutes total. You can pause anytime if needed.</p>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="disclaimer-box">
+                        <h3>⚠️ Important Disclaimer</h3>
+                        <p><strong>This is a screening test, not a diagnostic tool.</strong></p>
+                        <p>Results are for informational purposes only and cannot replace professional audiological evaluation. If you have hearing concerns, consult a healthcare professional.</p>
                     </div>
 
                     <div class="test-preview">
                         <h3>Try a Sample</h3>
                         <p>Click to hear what a test tone sounds like:</p>
-                        <button class="btn btn--secondary" id="sample-tone-btn">🔊 Play Sample Tone</button>
+                        <button class="btn btn--secondary" id="sample-tone-btn">🔊 Play Sample Tone (1000 Hz)</button>
                     </div>
 
                     <button class="btn btn--primary btn--full-width" id="start-test-btn">Start Hearing Test</button>
@@ -258,6 +421,12 @@
                         <div class="frequency-info">
                             <span class="frequency-label">Frequency:</span>
                             <span class="frequency-value" id="current-frequency">1000 Hz</span>
+                            <span class="frequency-description" id="current-frequency-desc">(Phone ring sound)</span>
+                        </div>
+                        <div class="test-counter">
+                            <span class="counter-label">Sound:</span>
+                            <span class="counter-value" id="current-sound-number">1</span>
+                            <span class="counter-total">of ~12 for this frequency</span>
                         </div>
                     </div>
 
