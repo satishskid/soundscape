@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skids Soundscape - Professional Audiometric Screening</title>
+    <meta name="description" content="Skids Soundscape - Professional hearing test application for comprehensive audiometric screening. Test your hearing across multiple frequencies with detailed results and analysis.">
+    <meta name="keywords" content="hearing test, audiometry, hearing screening, audiology, hearing loss, online hearing test, skids soundscape">
+    <meta name="author" content="greybrain.ai">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://skids-soundscape.netlify.app/">
+    <meta property="og:title" content="Skids Soundscape - Professional Audiometric Screening">
+    <meta property="og:description" content="Skids Soundscape - Professional hearing test application for comprehensive audiometric screening. Test your hearing across multiple frequencies with detailed results and analysis.">
+    <meta property="og:image" content="/favicon.svg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://skids-soundscape.netlify.app/">
+    <meta property="twitter:title" content="Skids Soundscape - Professional Audiometric Screening">
+    <meta property="twitter:description" content="Skids Soundscape - Professional hearing test application for comprehensive audiometric screening. Test your hearing across multiple frequencies with detailed results and analysis.">
+    <meta property="twitter:image" content="/favicon.svg">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    
+    <!-- PWA / App manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#21808D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Skids Soundscape">
+    
+    <!-- Security headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="style.css" as="style">
+    <link rel="preload" href="app.js" as="script">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- External scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Welcome Screen -->
+        <div class="screen active" id="welcome-screen">
+            <div class="container">
+                <div class="welcome-content">
+                    <div class="app-logo">🎧</div>
+                    <h1>Skids Soundscape</h1>
+                    <p class="app-attribution">made by greybrain.ai</p>
+                    <p class="welcome-text">Welcome to our comprehensive hearing test. This app will check your hearing across different frequencies to ensure optimal auditory health.</p>
+                    
+                    <div class="requirements-list">
+                        <div class="requirement-item">
+                            <span class="requirement-icon">🎧</span>
+                            <span>Wear headphones or earbuds</span>
+                        </div>
+                        <div class="requirement-item">
+                            <span class="requirement-icon">🤫</span>
+                            <span>Find a quiet environment</span>
+                        </div>
+                        <div class="requirement-item">
+                            <span class="requirement-icon">📱</span>
+                            <span>Hold device comfortably</span>
+                        </div>
+                    </div>
+
+                    <div class="privacy-notice">
+                        <h3>Privacy Notice</h3>
+                        <p>Your hearing test data is processed locally on your device. No personal information is transmitted or stored on external servers.</p>
+                    </div>
+
+                    <div class="consent-section">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="consent-checkbox">
+                            <span class="checkmark"></span>
+                            I consent to taking this hearing screening test
+                        </label>
+                    </div>
+
+                    <button class="btn btn--primary btn--full-width" id="start-btn" disabled>Start Hearing Test</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Environment Setup Screen -->
+        <div class="screen" id="environment-screen">
+            <div class="container">
+                <div class="environment-content">
+                    <h2>Environment Setup</h2>
+                    <div class="setup-steps">
+                        <div class="setup-step" id="noise-check">
+                            <div class="step-icon">🔊</div>
+                            <h3>Ambient Noise Check</h3>
+                            <p>Monitoring background noise levels...</p>
+                            <div class="noise-meter">
+                                <div class="noise-level" id="noise-level-bar"></div>
+                                <span class="noise-reading" id="noise-reading">-- dB</span>
+                            </div>
+                            <div class="status-indicator" id="noise-status">Checking...</div>
+                        </div>
+
+                        <div class="setup-step" id="headphone-check">
+                            <div class="step-icon">🎧</div>
+                            <h3>Headphone Verification</h3>
+                            <p>Click the button to test if headphones are connected properly.</p>
+                            <button class="btn btn--secondary" id="headphone-test-btn">Test Headphones</button>
+                            <div class="status-indicator" id="headphone-status">Not tested</div>
+                        </div>
+
+                        <div class="setup-step" id="calibration-step">
+                            <div class="step-icon">⚙️</div>
+                            <h3>Audio Calibration</h3>
+                            <p>Adjust volume to a comfortable level. You should hear a clear tone.</p>
+                            <button class="btn btn--secondary" id="calibration-btn">Play Calibration Tone</button>
+                            <div class="volume-controls">
+                                <label>Volume Level:</label>
+                                <input type="range" id="volume-slider" min="0" max="100" value="50">
+                                <span id="volume-display">50%</span>
+                            </div>
+                            <div class="status-indicator" id="calibration-status">Not calibrated</div>
+                        </div>
+                    </div>
+                    <button class="btn btn--primary btn--full-width" id="environment-continue-btn" disabled>Continue to Patient Info</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Info Screen -->
+        <div class="screen" id="patient-screen">
+            <div class="container">
+                <div class="patient-form">
+                    <h2>Patient Information</h2>
+                    <form id="patient-form">
+                        <div class="form-group">
+                            <label class="form-label" for="patient-name">Name (Optional)</label>
+                            <input type="text" class="form-control" id="patient-name" placeholder="Enter patient name">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="patient-age">Age *</label>
+                            <input type="number" class="form-control" id="patient-age" min="4" max="120" required placeholder="Enter age">
+                            <small class="form-help">Minimum age is 4 years</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="patient-gender">Gender (Optional)</label>
+                            <select class="form-control" id="patient-gender">
+                                <option value="">Select gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                                <option value="prefer-not-to-say">Prefer not to say</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="patient-id">Patient ID (Optional)</label>
+                            <input type="text" class="form-control" id="patient-id" placeholder="Enter patient ID">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="hearing-history">
+                                <span class="checkmark"></span>
+                                Previous hearing problems or hearing tests
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="anonymize-data">
+                                <span class="checkmark"></span>
+                                Keep data anonymous
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn--primary btn--full-width">Continue to Instructions</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Instructions Screen -->
+        <div class="screen" id="instructions-screen">
+            <div class="container">
+                <div class="instructions-content">
+                    <h2>Test Instructions</h2>
+                    <div class="instructions-visual">
+                        <div class="instruction-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>Listen Carefully</h3>
+                                <p id="instruction-text-1">You will hear tones at different frequencies. Some will be louder, some softer.</p>
+                            </div>
+                        </div>
+
+                        <div class="instruction-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>Respond When You Hear</h3>
+                                <p id="instruction-text-2">Tap "I Hear It" as soon as you hear any tone, no matter how quiet.</p>
+                            </div>
+                        </div>
+
+                        <div class="instruction-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>Stay Focused</h3>
+                                <p id="instruction-text-3">We'll test each ear separately. The test takes about 5-10 minutes.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="test-preview">
+                        <h3>Try a Sample</h3>
+                        <p>Click to hear what a test tone sounds like:</p>
+                        <button class="btn btn--secondary" id="sample-tone-btn">🔊 Play Sample Tone</button>
+                    </div>
+
+                    <button class="btn btn--primary btn--full-width" id="start-test-btn">Start Hearing Test</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hearing Test Screen -->
+        <div class="screen" id="test-screen">
+            <div class="container">
+                <div class="test-interface">
+                    <div class="test-header">
+                        <h2>Hearing Test</h2>
+                        <div class="test-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="test-progress-bar"></div>
+                            </div>
+                            <span class="progress-text" id="progress-text">0%</span>
+                        </div>
+                    </div>
+
+                    <div class="current-test-info">
+                        <div class="ear-indicator">
+                            <span class="ear-label">Testing:</span>
+                            <span class="ear-name" id="current-ear">Right Ear</span>
+                            <span class="ear-symbol" id="current-ear-symbol">👂</span>
+                        </div>
+                        <div class="frequency-info">
+                            <span class="frequency-label">Frequency:</span>
+                            <span class="frequency-value" id="current-frequency">1000 Hz</span>
+                        </div>
+                    </div>
+
+                    <div class="test-visual" id="test-visual">
+                        <div class="listening-indicator" id="listening-indicator">
+                            <div class="pulse-ring"></div>
+                            <div class="pulse-ring"></div>
+                            <div class="pulse-ring"></div>
+                            <span class="listening-text">Listening...</span>
+                        </div>
+                    </div>
+
+                    <div class="response-buttons">
+                        <button class="btn btn--primary response-btn" id="hear-btn">
+                            <span class="btn-icon">👍</span>
+                            <span class="btn-text">I Hear It</span>
+                        </button>
+                        <button class="btn btn--secondary response-btn" id="no-hear-btn">
+                            <span class="btn-icon">👎</span>
+                            <span class="btn-text">I Can't Hear It</span>
+                        </button>
+                    </div>
+
+                    <div class="test-controls">
+                        <button class="btn btn--outline" id="pause-btn">Pause Test</button>
+                        <button class="btn btn--outline" id="repeat-tone-btn">Repeat Tone</button>
+                    </div>
+
+                    <div class="ear-progress">
+                        <div class="ear-progress-item">
+                            <span class="ear-label">Right Ear</span>
+                            <div class="frequency-progress" id="right-ear-progress"></div>
+                        </div>
+                        <div class="ear-progress-item">
+                            <span class="ear-label">Left Ear</span>
+                            <div class="frequency-progress" id="left-ear-progress"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div class="screen" id="results-screen">
+            <div class="container">
+                <div class="results-content">
+                    <h2>Test Results</h2>
+                    
+                    <div class="results-summary">
+                        <div class="overall-result" id="overall-result">
+                            <div class="result-icon" id="result-icon">✓</div>
+                            <div class="result-text">
+                                <h3 id="result-title">Normal Hearing</h3>
+                                <p id="result-description">Your hearing appears to be within normal limits.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="audiogram-container">
+                        <h3>Your Audiogram</h3>
+                        <canvas id="audiogram-chart" width="400" height="300"></canvas>
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <span class="legend-symbol right-ear">○</span>
+                                <span>Right Ear</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-symbol left-ear">×</span>
+                                <span>Left Ear</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detailed-results">
+                        <h3>Detailed Analysis</h3>
+                        <div class="ear-results">
+                            <div class="ear-result">
+                                <h4>Right Ear</h4>
+                                <div class="ear-classification" id="right-ear-classification"></div>
+                                <div class="ear-thresholds" id="right-ear-thresholds"></div>
+                            </div>
+                            <div class="ear-result">
+                                <h4>Left Ear</h4>
+                                <div class="ear-classification" id="left-ear-classification"></div>
+                                <div class="ear-thresholds" id="left-ear-thresholds"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="recommendations">
+                        <h3>Recommendations</h3>
+                        <div class="recommendation-content" id="recommendations-content">
+                            <p>Based on your results, we recommend...</p>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn--primary" id="export-btn">📄 Export Results</button>
+                        <button class="btn btn--secondary" id="share-btn">📤 Share Results</button>
+                        <button class="btn btn--outline" id="print-btn">🖨️ Print</button>
+                        <button class="btn btn--outline" id="new-test-btn">🔄 New Test</button>
+                        <button class="btn btn--outline delete-btn" id="delete-data-btn">🗑️ Delete Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading/Transition Overlay -->
+        <div class="loading-overlay" id="loading-overlay">
+            <div class="loading-spinner"></div>
+            <p class="loading-text" id="loading-text">Preparing test...</p>
+        </div>
+
+        <!-- Audio Context -->
+        <audio id="audio-context" style="display: none;"></audio>
+    </div>
+
+    <script src="app.js" defer></script>
+</body>
+</html>

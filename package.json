@@ -1,0 +1,41 @@
+{
+  "name": "skids-soundscape",
+  "version": "1.0.0",
+  "description": "Skids Soundscape - A comprehensive web-based hearing screening application made by greybrain.ai",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "serve": "python -m http.server 8000",
+    "build": "echo 'No build process required for static site'",
+    "lint": "echo 'No linting configured'",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": [
+    "hearing",
+    "audiometry",
+    "medical",
+    "health",
+    "web-app",
+    "audio",
+    "testing",
+    "skids-soundscape",
+    "greybrain"
+  ],
+  "author": "greybrain.ai",
+  "license": "MIT",
+  "homepage": "https://skids-soundscape.netlify.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/skids-soundscape.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/skids-soundscape/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
