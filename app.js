@@ -55,6 +55,7 @@ class HearingScreenApp {
         this.totalSoundsForFrequency = 12; // Approximate sounds per frequency
         this.waitingForResponse = false;
         this.responseTimeout = null;
+        this.isTestActive = false; // New flag to control test execution
         
         // Environment checks
         this.environmentChecks = {
@@ -182,6 +183,16 @@ class HearingScreenApp {
     }
     
     showScreen(screenId) {
+        // Deactivate test if leaving test screen
+        if (this.currentScreen === 'test-screen' && screenId !== 'test-screen') {
+            this.isTestActive = false;
+            this.waitingForResponse = false;
+            if (this.responseTimeout) {
+                clearTimeout(this.responseTimeout);
+                this.responseTimeout = null;
+            }
+        }
+        
         // Hide all screens
         document.querySelectorAll('.screen').forEach(screen => {
             screen.classList.remove('active');
@@ -422,6 +433,7 @@ class HearingScreenApp {
         this.currentLevel = 40;
         this.testProgress = 0;
         this.isPaused = false;
+        this.isTestActive = true; // Enable test execution
         
         // Setup progress indicators
         this.setupProgressIndicators();
@@ -507,8 +519,9 @@ class HearingScreenApp {
     }
     
     async playTestTone(frequency) {
-        if (this.isPaused || this.currentLevel > 100 || this.waitingForResponse) {
-            // Don't start new tone if already waiting for response or paused
+        // Multiple safeguards to prevent loops
+        if (this.isPaused || this.currentLevel > 100 || this.waitingForResponse || !this.isTestActive) {
+            console.log('playTestTone blocked:', { isPaused: this.isPaused, level: this.currentLevel, waiting: this.waitingForResponse, active: this.isTestActive });
             if (this.currentLevel > 100) {
                 this.recordThreshold(120); // Record as 120 dB HL (no response)
             }
@@ -516,14 +529,7 @@ class HearingScreenApp {
         }
         
         // Stop any existing tone first
-        if (this.oscillator) {
-            try {
-                this.oscillator.stop();
-                this.oscillator = null;
-            } catch (e) {
-                // Tone already stopped
-            }
-        }
+        this.stopCurrentTone();
         
         // Update UI
         this.updateTestUI(frequency);
@@ -543,15 +549,34 @@ class HearingScreenApp {
         // Set waiting flag BEFORE playing tone
         this.waitingForResponse = true;
         
+        console.log(`Playing tone: ${frequency}Hz at ${this.currentLevel}dB`);
+        
         await this.playTone(frequency, volume, 1000);
         
         // Set timeout for no response (only if still waiting)
-        if (this.waitingForResponse) {
+        if (this.waitingForResponse && this.isTestActive) {
             this.responseTimeout = setTimeout(() => {
-                if (this.waitingForResponse) {
+                if (this.waitingForResponse && this.isTestActive) {
+                    console.log('Timeout: No response detected');
                     this.handleResponse(false); // No response = didn't hear
                 }
             }, 5000);
+        }
+    }
+    
+    stopCurrentTone() {
+        if (this.oscillator) {
+            try {
+                this.oscillator.stop();
+                this.oscillator = null;
+            } catch (e) {
+                // Tone already stopped
+            }
+        }
+        this.isPlaying = false;
+        if (this.currentToneTimeout) {
+            clearTimeout(this.currentToneTimeout);
+            this.currentToneTimeout = null;
         }
     }
     
@@ -565,7 +590,12 @@ class HearingScreenApp {
     }
     
     handleResponse(heard) {
-        if (!this.waitingForResponse) return;
+        if (!this.waitingForResponse) {
+            console.log('Response ignored - not waiting for response');
+            return;
+        }
+        
+        console.log(`Response received: ${heard ? 'Heard' : 'Not heard'} at ${this.currentLevel}dB`);
         
         // Clear the timeout and reset flags FIRST
         if (this.responseTimeout) {
@@ -603,7 +633,7 @@ class HearingScreenApp {
             } else {
                 // Continue testing at lower level after delay
                 setTimeout(() => {
-                    if (!this.waitingForResponse && !this.isPaused) {
+                    if (!this.waitingForResponse && !this.isPaused && this.isTestActive) {
                         this.playTestTone(frequency);
                     }
                 }, 1000);
@@ -620,7 +650,7 @@ class HearingScreenApp {
             } else {
                 // Continue testing at higher level after delay
                 setTimeout(() => {
-                    if (!this.waitingForResponse && !this.isPaused) {
+                    if (!this.waitingForResponse && !this.isPaused && this.isTestActive) {
                         this.playTestTone(frequency);
                     }
                 }, 1000);
@@ -631,6 +661,8 @@ class HearingScreenApp {
     recordThreshold(threshold) {
         const frequency = this.testFrequencies[this.currentFrequencyIndex];
         this.testResults[this.currentEar][frequency] = Math.min(120, Math.max(-10, threshold));
+        
+        console.log(`Threshold recorded: ${frequency}Hz ${this.currentEar} ear = ${threshold}dB`);
         
         // Mark frequency as completed
         const dotId = `${this.currentEar}-${frequency}`;
@@ -643,6 +675,8 @@ class HearingScreenApp {
     }
     
     moveToNextTest() {
+        console.log(`Moving to next test. Current: ${this.currentEar} ear, frequency index ${this.currentFrequencyIndex}`);
+        
         // Reset all test state for new frequency
         this.currentFrequencyIndex++;
         this.currentSoundNumber = 1; // Reset counter for new frequency
@@ -660,6 +694,7 @@ class HearingScreenApp {
             // Finished current ear
             if (this.currentEar === 'right') {
                 // Switch to left ear
+                console.log('Switching to left ear');
                 this.currentEar = 'left';
                 this.currentFrequencyIndex = 0;
                 
@@ -667,10 +702,13 @@ class HearingScreenApp {
                 setTimeout(() => this.startFrequencyTest(), 2000);
             } else {
                 // Test complete
+                console.log('Test complete');
                 this.completeTest();
             }
         } else {
             // Next frequency in same ear
+            const nextFreq = this.testFrequencies[this.currentFrequencyIndex];
+            console.log(`Next frequency: ${nextFreq}Hz`);
             setTimeout(() => this.startFrequencyTest(), 1500);
         }
     }
@@ -717,6 +755,7 @@ class HearingScreenApp {
     
     // Results Methods
     completeTest() {
+        this.isTestActive = false; // Deactivate test execution
         this.showLoading('Analyzing results...');
         
         setTimeout(() => {
