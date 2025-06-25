@@ -26,10 +26,10 @@
   "homepage": "https://skids-soundscape.netlify.app",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/skids-soundscape.git"
+    "url": "https://github.com/satishskid/soundscape.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/skids-soundscape/issues"
+    "url": "https://github.com/satishskid/soundscape/issues"
   },
   "dependencies": {},
   "devDependencies": {},
